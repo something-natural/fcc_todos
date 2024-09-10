@@ -10,6 +10,10 @@ const inputTaskTitle = document.getElementById("title-input");
 const inputTaskDate = document.getElementById("date-input");
 const inputTaskDescription = document.getElementById("description-input");
 
+//task object and array
+let currentObj = {}
+const taskList = JSON.parse(localStorage.getItem("data"))||[];
+
 //elements to handle
 const taskForm = document.getElementById("task-form")
 const taskContainer = document.getElementById("tasks-container")
@@ -26,58 +30,80 @@ default logic
 
 2. when taskForm opens :        
     - a. add eventlistener to addOrUpdateBtn / done
-    - b. add eventlistener to form and prevent default
-    - c. add eventlistener to closeBtn
+    - b. add eventlistener to form and prevent default /done
+    - c. add eventlistener to closeBtn /done
     - d. if this is update, call values from taskContainer with index
 
-    2-1 when click addOrUpdateBtn:
+    2-1 (need to renew) when click addOrUpdateBtn:
     - a. get values from inputs and make object, save array to localStorage / done
     - b. add elements tasContainer inner html with 2-1 a, delete, edit button / done
     - c. toggle ftaskform hidden / done
     - d. (new) if innerText was update, get elment id, find object, update object.
 
-    2-2 (new) when click closeBtn
+    2-2 (new) when click closeBtn / done
     - a. showModal / done
-    - b. if click discard, do thing and close modal, toggle taskForm hidden
-    - c. if click cancel, close modal
+    - b. if click discard, do thing and close modal, toggle taskForm hidden, call reset / done
+    - c. if click cancel, close modal / done
 
 
-3. when click delete
-    - a. get data from localStorage
-    - b. delete object using element ID and save data to localstorage
-    - c. remove parentElement from html
+3. when click delete /done
+    - a. get data from localStorage /done
+    - b. delete object using element ID and save data to localstorage /done
+    - c. remove parentElement from html /done
 
 
 4. when click Edit
-    - a. toggle ftaskform hidden, 
-    - b. change innertext of addOrUpdateBtn to update
+    - a. toggle taskform hidden / done
+    - b. change innertext of addOrUpdateBtn to update / done
     - c. get data from localStorage
     - d. get input value from object and display in input fields
     - e. if input value is changed, update object and save data to localstorage
 */
 
 
-// function to edit task
-const editTask = (el) => {    
-    console.log("edit!", el.parentElement.id)
-};
-
 // function to delete task
-const deleteTask = (el) => {    
-    const taskList = JSON.parse(localStorage.getItem("data"));
+const deleteTask = (el) => {
     taskList.splice(taskList.findIndex((item) => item.id === el.parentElement.id), 1);
     localStorage.setItem("data", JSON.stringify(taskList));    
     el.parentElement.remove(); // or call renderHtml();
 };
 
+// function to edit task
+const editTask = (el) => {   
+     // change addOrUpdate btn inner text to update and toggle taskform
+     addOrUpdateBtn.innerText = "Update Task";
+     taskForm.classList.toggle("hidden");
+     // get data from localStorage, find object to edit using id and findIndex     
+     currentObj = taskList[taskList.findIndex((item) => item.id === el.parentElement.id)]
+    //set input values from object
+    inputTaskTitle.value = currentObj.title;
+    inputTaskDate.value = currentObj.date;
+    inputTaskDescription.value = currentObj.description;
+};
+
+
+// function to makeTaksObj and save to localStorage
+const makeTaskObj = () => {              
+    //console.log("tasklist length", taskList.length)
+    // make object and push to taskList
+    const taskObj = {
+        "id": `${inputTaskTitle.value.toLowerCase().split(" ").join("-")}-${Date.now()}`,
+        "title": inputTaskTitle.value,
+        "date": inputTaskDate.value,
+        "description": inputTaskDescription.value
+    }
+    taskList.push(taskObj);    
+    // psave data to localStorage
+    localStorage.setItem("data", JSON.stringify(taskList))
+    //console.log(taskObj)
+    taskForm.classList.toggle("hidden");
+    renderHtml();
+}
 
 
 // function to render task list html
 const renderHtml = () => {
-    taskContainer.innerHTML = "";
-    // get date from localStorage
-    const taskList = JSON.parse(localStorage.getItem("data"));
-    //console.log("tasklist", taskList)
+    taskContainer.innerHTML = "";            
     // convert to html element and render.
     const elementHtml = taskList.forEach( ({id, title, date, description}) => {
         taskContainer.innerHTML +=
@@ -93,26 +119,6 @@ const renderHtml = () => {
     });
 }
 
-// function to makeTaksObj and save to localStorage
-const makeTaskObj = (e) => {
-    // get data from localStorage
-    const taskList = JSON.parse(localStorage.getItem("data")) || []; 
-    //console.log("tasklist length", taskList.length)
-    // make object and push to taskList
-    const taskObj = {
-        "id": `${inputTaskTitle.value.toLowerCase().split(" ").join("-")}-${Date.now()}`,
-        "title": inputTaskTitle.value,
-        "date": inputTaskDate.value,
-        "description": inputTaskDescription.value
-    }
-    taskList.push(taskObj);
-    console.log(taskList);    
-    // psave data to localStorage
-    localStorage.setItem("data", JSON.stringify(taskList))
-    //console.log(taskObj)
-    taskForm.classList.toggle("hidden");
-    renderHtml();
-}
 
 //function reset
 const reset = () => {
@@ -120,11 +126,13 @@ const reset = () => {
     inputTaskTitle.value = "";
     inputTaskDate.value = "";
     inputTaskDescription.value = "";
+    currentTask = {};
 }
 
 
 //event listeners
 addNewTaskBtn.addEventListener("click",() => {
+    addOrUpdateBtn.innerText = "Add Task"
     taskForm.classList.toggle("hidden"); 
     reset();
 })
