@@ -83,21 +83,30 @@ const editTask = (el) => {
 
 
 // function to makeTaksObj and save to localStorage
-const makeTaskObj = () => {              
-    //console.log("tasklist length", taskList.length)
-    // make object and push to taskList
+const makeTaskObj = () => {                      
+    
+    // make taskObj
     const taskObj = {
-        "id": `${inputTaskTitle.value.toLowerCase().split(" ").join("-")}-${Date.now()}`,
+        "id": currentObj.id ? currentObj.id : `${inputTaskTitle.value.toLowerCase().split(" ").join("-")}-${Date.now()}`,
         "title": inputTaskTitle.value,
         "date": inputTaskDate.value,
         "description": inputTaskDescription.value
     }
-    taskList.push(taskObj);    
-    // psave data to localStorage
+ 
+    // update or push task
+    if (currentObj.id){
+        const index = taskList.findIndex((item) => item.id === currentObj.id);
+        taskList[index] = taskObj;
+    } else {
+        taskList.push(taskObj);
+    }
+
+    // save data to localStorage
     localStorage.setItem("data", JSON.stringify(taskList))
     //console.log(taskObj)
     taskForm.classList.toggle("hidden");
     renderHtml();
+    reset();
 }
 
 
@@ -126,7 +135,7 @@ const reset = () => {
     inputTaskTitle.value = "";
     inputTaskDate.value = "";
     inputTaskDescription.value = "";
-    currentTask = {};
+    currentObj = {};
 }
 
 
@@ -137,9 +146,11 @@ addNewTaskBtn.addEventListener("click",() => {
     reset();
 })
 
-addOrUpdateBtn.addEventListener("click", makeTaskObj)
 
-taskForm.addEventListener("submit", (e) => e.preventDefault())
+taskForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    makeTaskObj();
+})
 
 closeBtn.addEventListener("click", () => {
     closeDialog.showModal()
