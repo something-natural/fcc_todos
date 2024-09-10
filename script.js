@@ -14,7 +14,6 @@ const inputTaskDescription = document.getElementById("description-input");
 const taskForm = document.getElementById("task-form")
 const taskContainer = document.getElementById("tasks-container")
 
-
 /*
 default logic
 
@@ -34,32 +33,60 @@ default logic
     - b. add elements tasContainer inner html with 2-1 a, delete, edit button
     - c. toggle ftaskform hidden 
 */
-const editTask = (e) => {
-    console.log("edit!")
+
+// function to edit task
+const editTask = (el) => {    
+    console.log("edit!", el.parentElement.id)
 };
 
-const deleteTask = (e) => {
-    console.log("delete!")
+// function to delete task
+const deleteTask = (el) => {    
+    const taskList = JSON.parse(localStorage.getItem("data"));
+    taskList.splice(taskList.findIndex((item) => item.id === el.parentElement.id), 1);
+    localStorage.setItem("data", JSON.stringify(taskList));    
+    el.parentElement.remove(); // or call renderHtml();
+};
+
+// function to render task list html
+const renderHtml = () => {
+    taskContainer.innerHTML = "";
+    // get date from localStorage
+    const taskList = JSON.parse(localStorage.getItem("data"));
+    //console.log("tasklist", taskList)
+    // convert to html element and render.
+    const elementHtml = taskList.forEach( ({id, title, date, description}) => {
+        taskContainer.innerHTML +=
+        `
+        <div class="task" id="${id}">
+            <p>Title: ${title}</p>
+            <p>Date: ${date}</p>
+            <p>Description: ${description}</p>
+            <button class="btn" type="button" onclick="editTask(this)">Edit</button>
+            <button class="btn" type="button" onclick="deleteTask(this)">Delete</button>
+        </div>
+    `        
+    });
 }
 
+// function to makeTaksObj and save to localStorage
 const makeTaskObj = (e) => {
+    // get data from localStorage
+    const taskList = JSON.parse(localStorage.getItem("data")) || []; 
+    //console.log("tasklist length", taskList.length)
+    // make object and push to taskList
     const taskObj = {
+        "id": `${inputTaskTitle.value.toLowerCase().split(" ").join("-")}-${Date.now()}`,
         "title": inputTaskTitle.value,
         "date": inputTaskDate.value,
         "description": inputTaskDescription.value
     }
+    taskList.push(taskObj);
+    console.log(taskList);    
+    // psave data to localStorage
+    localStorage.setItem("data", JSON.stringify(taskList))
     //console.log(taskObj)
-    const elementHtml = `
-        <div class="task">
-        <p>Title: ${taskObj.title}</p>
-        <p>Date: ${taskObj.date}</p>
-        <p>Description: ${taskObj.description}</p>
-        <button class="btn" type="button" onclick="editTask(this)">Edit</button>
-        <button class="btn" type="button" onclick="deleteTask(this)">Delete</button>
-        </div>
-    `;
-    taskForm.classList.toggle("hidden"); 
-    taskContainer.innerHTML += elementHtml;
+    taskForm.classList.toggle("hidden");
+    renderHtml();
 }
 
 const reset = () => {
