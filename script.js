@@ -38,12 +38,13 @@ default logic
     - a. get values from inputs and make object, save array to localStorage / done
     - b. add elements tasContainer inner html with 2-1 a, delete, edit button / done
     - c. toggle ftaskform hidden / done
-    - d. (new) if innerText was update, get elment id, find object, update object.
+    - d. (new) if innerText was update, get elment id, find object, update object. /done
 
     2-2 (new) when click closeBtn / done
     - a. showModal / done
     - b. if click discard, do thing and close modal, toggle taskForm hidden, call reset / done
     - c. if click cancel, close modal / done
+    - d. if every value is null or not changed, just toogle taskForm /done
 
 
 3. when click delete /done
@@ -54,10 +55,8 @@ default logic
 
 4. when click Edit
     - a. toggle taskform hidden / done
-    - b. change innertext of addOrUpdateBtn to update / done
-    - c. get data from localStorage
-    - d. get input value from object and display in input fields
-    - e. if input value is changed, update object and save data to localstorage
+    - b. change innertext of addOrUpdateBtn to update / done    
+    - c. get input value from object and display in input fields / done    
 */
 
 
@@ -136,13 +135,13 @@ const reset = () => {
     inputTaskDate.value = "";
     inputTaskDescription.value = "";
     currentObj = {};
+    taskForm.classList.toggle("hidden")
 }
 
 
 //event listeners
 addNewTaskBtn.addEventListener("click",() => {
-    addOrUpdateBtn.innerText = "Add Task"
-    taskForm.classList.toggle("hidden"); 
+    addOrUpdateBtn.innerText = "Add Task"     
     reset();
 })
 
@@ -152,14 +151,24 @@ taskForm.addEventListener("submit", (e) => {
     makeTaskObj();
 })
 
+
 closeBtn.addEventListener("click", () => {
-    closeDialog.showModal()
+    // check value input or change
+    const inputValueExists = inputTaskDate.value || inputTaskTitle.value || inputTaskDescription.value;
+    const inputValueChanged = currentObj.title !== inputTaskTitle.value || currentObj.date !== inputTaskDate.value || currentObj.description !== inputTaskDescription.value
+    
+    // when both true show modal
+    if ( inputValueExists && inputValueChanged){        
+        closeDialog.showModal()        
+    } else {
+        reset();
+    };    
     }
 )
 
 cancelBtn.addEventListener("click", () => closeDialog.close());
+
 discardBtn.addEventListener("click", () => {
     closeDialog.close();
     reset();
-    taskForm.classList.toggle("hidden");     
 });
